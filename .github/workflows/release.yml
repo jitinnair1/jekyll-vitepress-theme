@@ -43,14 +43,16 @@ jobs:
           GEM_NAME="jekyll-vitepress-theme"
           echo "Fetching published versions for '$GEM_NAME'..."
 
-          ALL_PUBLISHED_VERSIONS=$(( \
-            gem list ^${GEM_NAME}$ -r --all 2>/dev/null || true; \
-            gem list ^${GEM_NAME}$ -r --prerelease 2>/dev/null || true; \
-          ) | sed -n 's/.*(\(.*\)).*/\1/p' \
-            | tr ',' '\n' \
-            | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' \
-            | grep . \
-            | sort -u )
+          ALL_PUBLISHED_VERSIONS=$( \
+            ( \
+              gem list ^${GEM_NAME}$ -r --all 2>/dev/null || true
+              gem list ^${GEM_NAME}$ -r --prerelease 2>/dev/null || true
+            ) | sed -n 's/.*(\(.*\)).*/\1/p' \
+              | tr ',' '\n' \
+              | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' \
+              | sed '/^$/d' \
+              | sort -u \
+          )
 
           if echo "$ALL_PUBLISHED_VERSIONS" | grep -Fxq "$VERSION"; then
             echo "Verdict: Version $VERSION already published."
