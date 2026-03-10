@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="{{ site.lang | default: 'en-US' }}">
+  {% include head.html %}
+  <body data-vp-scroll-offset="{{ site.vp_theme.scroll_offset | default: 134 }}">
+    {% assign is_home = false %}
+    {% if page.vp_layout == 'home' or page.layout == 'home' or page.url == '/' %}
+      {% assign is_home = true %}
+    {% endif %}
+
+    {% assign has_sidebar = true %}
+    {% if is_home %}
+      {% assign has_sidebar = false %}
+    {% endif %}
+
+    <div id="app">
+      <div class="Layout{% if page.page_class %} {{ page.page_class }}{% endif %}">
+        <span tabindex="-1"></span>
+        <a href="#VPContent" class="VPSkipLink visually-hidden">{{ site.vp_theme.skip_to_content_label | default: 'Skip to content' }}</a>
+
+        <div class="VPBackdrop backdrop" id="vp-backdrop"></div>
+
+        {% include nav.html has_sidebar=has_sidebar is_home=is_home %}
+        {% include search.html %}
+        {% if has_sidebar %}
+          {% include local_nav.html %}
+          {% include sidebar.html %}
+        {% endif %}
+
+        <div class="VPContent{% if has_sidebar %} has-sidebar{% endif %}{% if is_home %} is-home{% endif %}" id="VPContent">
+          {% if has_sidebar %}
+            <div class="VPDoc has-sidebar has-aside">
+              <div class="container">
+                <div class="aside">
+                  <div class="aside-curtain"></div>
+                  <div class="aside-container">
+                    <div class="aside-content">
+                      <div class="VPDocAside">
+                        <nav aria-labelledby="doc-outline-aria-label" class="VPDocAsideOutline has-outline" id="vp-doc-outline">
+                          <div class="content">
+                            <div class="outline-marker" id="vp-outline-marker"></div>
+                            <div aria-level="2" class="outline-title" id="doc-outline-aria-label" role="heading">{{ site.vp_theme.outline_title | default: 'On this page' }}</div>
+                            <ul class="VPDocOutlineItem root"></ul>
+                          </div>
+                        </nav>
+                        <div class="spacer"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="content">
+                  <div class="content-container">
+                    <main class="main">
+                      <div class="vp-doc{% if page.url %} {{ page.url | replace: '/', '_' | replace: '.', '_' }}{% endif %}">
+                        {% assign show_auto_page_title = false %}
+                        {% if page.title and page.vp_auto_title != false %}
+                          {% unless content contains '<h1' %}
+                            {% assign show_auto_page_title = true %}
+                          {% endunless %}
+                        {% endif %}
+                        {% if show_auto_page_title %}
+                          <h1>{{ page.title }}</h1>
+                        {% endif %}
+                        {{ content }}
+                      </div>
+                    </main>
+                    {% include doc_footer.html %}
+                    {% include vp_slots/doc_footer.html %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% elsif is_home %}
+            {% include home.html content=content %}
+          {% else %}
+            <div class="VPDoc">
+              <div class="container">
+                <div class="content">
+                  <div class="content-container">
+                    <main class="main">
+                      <div class="vp-doc{% if page.url %} {{ page.url | replace: '/', '_' | replace: '.', '_' }}{% endif %}">
+                        {% assign show_auto_page_title = false %}
+                        {% if page.title and page.vp_auto_title != false %}
+                          {% unless content contains '<h1' %}
+                            {% assign show_auto_page_title = true %}
+                          {% endunless %}
+                        {% endif %}
+                        {% if show_auto_page_title %}
+                          <h1>{{ page.title }}</h1>
+                        {% endif %}
+                        {{ content }}
+                      </div>
+                    </main>
+                    {% include doc_footer.html %}
+                    {% include vp_slots/doc_footer.html %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+
+        {% assign show_global_footer = false %}
+        {% if site.vp_theme.footer and page.footer != false %}
+          {% if has_sidebar == false or site.vp_theme.footer.show_on_docs == true %}
+            {% assign show_global_footer = true %}
+          {% endif %}
+        {% endif %}
+
+        {% if show_global_footer %}
+          <footer class="VPFooter{% if has_sidebar %} has-sidebar{% endif %}">
+            <div class="container">
+              {% if site.vp_theme.footer.message %}
+                <p class="message">{{ site.vp_theme.footer.message }}</p>
+              {% endif %}
+              {% if site.vp_theme.footer.copyright %}
+                <p class="copyright">{{ site.vp_theme.footer.copyright }}</p>
+              {% endif %}
+            </div>
+          </footer>
+        {% endif %}
+
+        {% include vp_slots/layout_bottom.html %}
+      </div>
+    </div>
+  </body>
+</html>

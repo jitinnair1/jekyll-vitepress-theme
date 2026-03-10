@@ -1,0 +1,66 @@
+PreCommit:
+  TrailingWhitespace:
+    enabled: true
+    auto_correct: true
+    exclude:
+      - "**/*.lock"
+      - "assets/images/**/*.svg"
+
+  FinalNewline:
+    enabled: true
+    auto_correct: true
+
+  HardTabs:
+    enabled: true
+    exclude:
+      - "assets/images/**/*.svg"
+
+  YamlSyntax:
+    enabled: true
+
+  JsonSyntax:
+    enabled: true
+    exclude:
+      - "search.json"
+
+  BrokenSymlinks:
+    enabled: true
+
+  RuboCop:
+    enabled: true
+    required_executable: "bundle"
+    command: ["bundle", "exec", "rubocop", "--force-exclusion"]
+    include:
+      - "**/*.rb"
+      - "*.gemspec"
+      - "Rakefile"
+    on_warn: fail
+
+  JavaScriptSyntax:
+    enabled: true
+    required_executable: "npm"
+    include:
+      - "assets/js/**/*.js"
+      - "scripts/**/*.js"
+    command: ["npm", "run", "--silent", "lint:js", "--"]
+
+  CssSyntax:
+    enabled: true
+    required_executable: "npm"
+    include:
+      - "assets/css/**/*.css"
+    command: ["npm", "run", "--silent", "lint:css", "--"]
+
+  MarkdownLint:
+    enabled: true
+    required_executable: "npm"
+    include:
+      - "**/*.md"
+    command: ["npm", "run", "--silent", "lint:md", "--"]
+
+PrePush:
+  Verify:
+    enabled: true
+    required_executable: "bundle"
+    command: ["bundle", "exec", "rake", "verify"]
+    pass_filenames: false

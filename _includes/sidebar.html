@@ -1,0 +1,47 @@
+<aside class="VPSidebar" id="vp-sidebar">
+  <div class="curtain"></div>
+  <nav class="nav" id="VPSidebarNav" aria-labelledby="sidebar-aria-label" tabindex="-1">
+    <span class="visually-hidden" id="sidebar-aria-label">Sidebar Navigation</span>
+
+    {% for group in site.vp_theme.sidebar_collections %}
+      {% assign docs = site[group.id] | sort: 'nav_order' %}
+      {% if docs.size > 0 %}
+        {% assign has_active = false %}
+        {% for doc in docs %}
+          {% if doc.url == page.url %}
+            {% assign has_active = true %}
+          {% endif %}
+        {% endfor %}
+
+        <div class="group no-transition">
+          <section class="VPSidebarItem level-0 collapsible{% if has_active %} has-active{% endif %}">
+            <div class="item" role="button" tabindex="0">
+              <div class="indicator"></div>
+              <h2 class="text">{{ group.text }}</h2>
+              <div class="caret" role="button" aria-label="toggle section" tabindex="0">
+                <span class="vpi-chevron-right caret-icon"></span>
+              </div>
+            </div>
+
+            <div class="items">
+              {% for doc in docs %}
+                {% assign active = false %}
+                {% if doc.url == page.url %}
+                  {% assign active = true %}
+                {% endif %}
+                <div class="VPSidebarItem level-1 is-link{% if active %} is-active{% endif %}">
+                  <div class="item">
+                    <div class="indicator"></div>
+                    <a class="VPLink link link" href="{{ doc.url | relative_url }}">
+                      <p class="text">{{ doc.title }}</p>
+                    </a>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </section>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </nav>
+</aside>

@@ -1,0 +1,106 @@
+name: Main CI
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "_**/**"
+      - "_config.yml"
+      - "assets/**"
+      - "lib/**"
+      - "scripts/**"
+      - "*.md"
+      - "*.gemspec"
+      - "Gemfile"
+      - "Gemfile.lock"
+      - "package.json"
+      - "package-lock.json"
+      - ".markdownlint-cli2.jsonc"
+      - "eslint.config.mjs"
+      - "stylelint.config.cjs"
+      - ".rubocop.yml"
+      - ".overcommit.yml"
+      - "Rakefile"
+      - "search.json"
+      - ".github/workflows/_lint.yml"
+      - ".github/workflows/_heavy.yml"
+      - ".github/workflows/main.yml"
+      - ".github/workflows/release.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: main-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    uses: ./.github/workflows/_lint.yml
+    with:
+      ruby-version: "3.3"
+      bundler-cache: true
+
+  heavy:
+    needs: [lint]
+    uses: ./.github/workflows/_heavy.yml
+    with:
+      ruby-version: "3.3"
+      node-version: "22"
+      bundler-cache: true
+
+  release_needed:
+    name: Release Gate
+    needs: [heavy]
+    runs-on: ubuntu-latest
+    outputs:
+      should_release: ${{ steps.check_version.outputs.version_changed }}
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+
+      - name: Check if version needs publishing
+        id: check_version
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION_FILE="./lib/jekyll/vitepress_theme/version.rb"
+          VERSION=$(ruby -r "$VERSION_FILE" -e "puts Jekyll::VitePressTheme::VERSION" 2>/dev/null)
+
+          if [ -z "$VERSION" ]; then
+            echo "Error: Could not extract VERSION from $VERSION_FILE" >&2
+            exit 1
+          fi
+          echo "Local version: $VERSION"
+
+          GEM_NAME="jekyll-vitepress-theme"
+          ALL_PUBLISHED_VERSIONS=$(( \
+            gem list ^${GEM_NAME}$ -r --all 2>/dev/null || true; \
+            gem list ^${GEM_NAME}$ -r --prerelease 2>/dev/null || true; \
+          ) | sed -n 's/.*(\(.*\)).*/\1/p' \
+            | tr ',' '\n' \
+            | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' \
+            | grep . \
+            | sort -u )
+
+          if echo "$ALL_PUBLISHED_VERSIONS" | grep -Fxq "$VERSION"; then
+            echo "version_changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "version_changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  release:
+    if: needs.release_needed.outputs.should_release == 'true'
+    needs: [release_needed]
+    uses: ./.github/workflows/release.yml
+    permissions:
+      contents: write
+    secrets: inherit

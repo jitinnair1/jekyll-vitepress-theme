@@ -1,0 +1,27 @@
+name: PR Fast
+
+on:
+  pull_request_target:
+    branches: ["main"]
+    paths:
+      - "lib/**"
+      - "*.gemspec"
+      - "Gemfile"
+      - "Gemfile.lock"
+      - ".rubocop.yml"
+      - ".github/workflows/_lint.yml"
+      - ".github/workflows/pr-fast.yml"
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  rubocop:
+    name: RuboCop (Fast)
+    uses: ./.github/workflows/_lint.yml
+    with:
+      ruby-version: "3.3"
+      bundler-cache: false
+      checkout-repository: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name || '' }}
+      checkout-ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || '' }}

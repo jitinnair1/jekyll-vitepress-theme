@@ -1,0 +1,41 @@
+name: PR Heavy
+
+on:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "_**/**"
+      - "_config.yml"
+      - "assets/**"
+      - "lib/**"
+      - "scripts/**"
+      - "*.md"
+      - "*.gemspec"
+      - "Gemfile"
+      - "Gemfile.lock"
+      - "package.json"
+      - "package-lock.json"
+      - ".markdownlint-cli2.jsonc"
+      - "eslint.config.mjs"
+      - "stylelint.config.cjs"
+      - ".rubocop.yml"
+      - ".overcommit.yml"
+      - "Rakefile"
+      - "search.json"
+      - ".github/workflows/_heavy.yml"
+      - ".github/workflows/pr-heavy.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-heavy-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  heavy:
+    uses: ./.github/workflows/_heavy.yml
+    with:
+      ruby-version: "3.3"
+      node-version: "22"
+      bundler-cache: false

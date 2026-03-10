@@ -1,0 +1,184 @@
+{% assign edit_link_enabled = true %}
+{% if site.vp_theme.edit_link == false or page.edit_link == false %}
+  {% assign edit_link_enabled = false %}
+{% endif %}
+
+{% assign edit_link = nil %}
+{% if edit_link_enabled and site.vp_theme.edit_link and site.vp_theme.edit_link.pattern and page.path %}
+  {% assign edit_link = site.vp_theme.edit_link.pattern | replace: ':path', page.path %}
+{% endif %}
+
+{% assign edit_link_text = 'Edit this page on GitHub' %}
+{% if site.vp_theme.edit_link and site.vp_theme.edit_link.text %}
+  {% assign edit_link_text = site.vp_theme.edit_link.text %}
+{% endif %}
+
+{% assign last_updated_enabled = true %}
+{% if site.vp_theme.last_updated == false or page.last_updated == false %}
+  {% assign last_updated_enabled = false %}
+{% endif %}
+
+{% assign last_updated_text = 'Last updated' %}
+{% if site.vp_theme.last_updated and site.vp_theme.last_updated.text %}
+  {% assign last_updated_text = site.vp_theme.last_updated.text %}
+{% endif %}
+
+{% assign last_updated_format = '%-d %b %Y, %H:%M' %}
+{% if site.vp_theme.last_updated and site.vp_theme.last_updated.format %}
+  {% assign last_updated_format = site.vp_theme.last_updated.format %}
+{% endif %}
+
+{% assign last_updated_at = page.last_updated_at | default: page.last_updated | default: nil %}
+{% assign show_last_updated = false %}
+{% if last_updated_enabled and last_updated_at %}
+  {% assign show_last_updated = true %}
+{% endif %}
+
+{% assign prev_doc = nil %}
+{% assign next_doc = nil %}
+{% if page.collection %}
+  {% assign docs = site[page.collection] | sort: 'nav_order' %}
+  {% assign found_current = false %}
+  {% for doc in docs %}
+    {% if found_current and next_doc == nil %}
+      {% assign next_doc = doc %}
+    {% endif %}
+
+    {% if doc.url == page.url %}
+      {% assign found_current = true %}
+    {% elsif found_current == false %}
+      {% assign prev_doc = doc %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+{% assign doc_footer_enabled = true %}
+{% if site.vp_theme.doc_footer == false or page.doc_footer == false %}
+  {% assign doc_footer_enabled = false %}
+{% endif %}
+
+{% assign prev_enabled = doc_footer_enabled %}
+{% assign next_enabled = doc_footer_enabled %}
+{% assign prev_desc = 'Previous page' %}
+{% assign next_desc = 'Next page' %}
+
+{% if site.vp_theme.doc_footer and site.vp_theme.doc_footer != false %}
+  {% if site.vp_theme.doc_footer.prev == false %}
+    {% assign prev_enabled = false %}
+  {% elsif site.vp_theme.doc_footer.prev %}
+    {% assign prev_desc = site.vp_theme.doc_footer.prev %}
+  {% endif %}
+
+  {% if site.vp_theme.doc_footer.next == false %}
+    {% assign next_enabled = false %}
+  {% elsif site.vp_theme.doc_footer.next %}
+    {% assign next_desc = site.vp_theme.doc_footer.next %}
+  {% endif %}
+{% endif %}
+
+{% if page.doc_footer and page.doc_footer != false %}
+  {% if page.doc_footer.prev == false %}
+    {% assign prev_enabled = false %}
+  {% elsif page.doc_footer.prev %}
+    {% assign prev_desc = page.doc_footer.prev %}
+  {% endif %}
+
+  {% if page.doc_footer.next == false %}
+    {% assign next_enabled = false %}
+  {% elsif page.doc_footer.next %}
+    {% assign next_desc = page.doc_footer.next %}
+  {% endif %}
+{% endif %}
+
+{% if page.prev == false %}
+  {% assign prev_enabled = false %}
+{% endif %}
+
+{% if page.next == false %}
+  {% assign next_enabled = false %}
+{% endif %}
+
+{% assign prev_url = nil %}
+{% assign prev_title = nil %}
+{% assign next_url = nil %}
+{% assign next_title = nil %}
+
+{% if prev_enabled %}
+  {% if page.prev and page.prev != false and page.prev.link %}
+    {% assign prev_url = page.prev.link %}
+    {% assign prev_title = page.prev.text | default: page.prev.link %}
+  {% elsif prev_doc %}
+    {% assign prev_url = prev_doc.url | relative_url %}
+    {% assign prev_title = prev_doc.title %}
+  {% endif %}
+{% endif %}
+
+{% if next_enabled %}
+  {% if page.next and page.next != false and page.next.link %}
+    {% assign next_url = page.next.link %}
+    {% assign next_title = page.next.text | default: page.next.link %}
+  {% elsif next_doc %}
+    {% assign next_url = next_doc.url | relative_url %}
+    {% assign next_title = next_doc.title %}
+  {% endif %}
+{% endif %}
+
+{% assign show_prev_link = false %}
+{% assign show_next_link = false %}
+{% if prev_url and prev_title %}
+  {% assign show_prev_link = true %}
+{% endif %}
+{% if next_url and next_title %}
+  {% assign show_next_link = true %}
+{% endif %}
+
+{% assign show_footer = false %}
+{% if edit_link or show_last_updated or show_prev_link or show_next_link %}
+  {% assign show_footer = true %}
+{% endif %}
+
+{% if show_footer %}
+  <footer class="VPDocFooter">
+    {% if edit_link or show_last_updated %}
+      <div class="edit-info">
+        {% if edit_link %}
+          <div class="edit-link">
+            <a class="VPLink link vp-external-link-icon no-icon edit-link-button" href="{{ edit_link }}" target="_blank" rel="noreferrer">
+              <span class="vpi-square-pen edit-link-icon"></span>
+              {{ edit_link_text }}
+            </a>
+          </div>
+        {% endif %}
+        {% if show_last_updated %}
+          <div class="last-updated">
+            <p class="VPLastUpdated">{{ last_updated_text }}: <time datetime="{{ last_updated_at | date_to_xmlschema }}" lang="{{ site.lang | default: 'en-US' }}">{{ last_updated_at | date: last_updated_format }}</time></p>
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    {% if show_prev_link or show_next_link %}
+      <nav class="prev-next" aria-labelledby="doc-footer-aria-label">
+        <span class="visually-hidden" id="doc-footer-aria-label">Pager</span>
+
+        <div class="pager">
+          {% if show_prev_link %}
+            <a class="VPLink link pager-link prev" href="{{ prev_url }}">
+              <span class="desc">{{ prev_desc }}</span>
+              <span class="title">{{ prev_title }}</span>
+            </a>
+          {% endif %}
+        </div>
+
+        <div class="pager">
+          {% if show_next_link %}
+            <a class="VPLink link pager-link next" href="{{ next_url }}">
+              <span class="desc">{{ next_desc }}</span>
+              <span class="title">{{ next_title }}</span>
+            </a>
+          {% endif %}
+        </div>
+      </nav>
+    {% endif %}
+  </footer>
+{% endif %}

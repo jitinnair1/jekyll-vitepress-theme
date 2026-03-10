@@ -1,0 +1,65 @@
+name: _Heavy
+
+on:
+  workflow_call:
+    inputs:
+      ruby-version:
+        description: Ruby version for heavy checks
+        required: false
+        type: string
+        default: "3.3"
+      node-version:
+        description: Node version for front-end tooling
+        required: false
+        type: string
+        default: "22"
+      bundler-cache:
+        description: Enable Bundler cache
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  heavy:
+    name: Heavy Checks (Build + Smoke)
+    runs-on: ubuntu-latest
+    env:
+      BUNDLE_PATH: vendor/bundle
+      BUNDLE_DISABLE_SHARED_GEMS: "true"
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ inputs.ruby-version }}
+          bundler-cache: ${{ inputs.bundler-cache }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: npm
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Run Node linters
+        run: npm run lint
+
+      - name: Build Jekyll site
+        run: bundle exec jekyll build
+        env:
+          JEKYLL_ENV: production
+
+      - name: Smoke test built docs
+        run: bash scripts/smoke_test.sh _site
+
+      - name: Build gem
+        run: gem build jekyll-vitepress-theme.gemspec

@@ -1,0 +1,141 @@
+title: Jekyll VitePress Theme
+description: VitePress-style documentation theme for Jekyll.
+lang: en-US
+timezone: UTC
+
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter_opts:
+    block:
+      line_numbers: false
+
+permalink: pretty
+
+theme: jekyll-vitepress-theme
+
+collections:
+  getting_started:
+    output: true
+    permalink: "/:name/"
+  core_features:
+    output: true
+    permalink: "/:name/"
+  advanced:
+    output: true
+    permalink: "/:name/"
+  reference:
+    output: true
+    permalink: "/:name/"
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default
+  - scope:
+      type: getting_started
+    values:
+      layout: default
+  - scope:
+      type: core_features
+    values:
+      layout: default
+  - scope:
+      type: advanced
+    values:
+      layout: default
+  - scope:
+      type: reference
+    values:
+      layout: default
+
+vp_theme:
+  logo: /assets/images/theme/vitepress-logo-mini.svg
+  logo_light: /assets/images/theme/vitepress-logo-mini.svg
+  logo_dark: /assets/images/theme/vitepress-logo-mini.svg
+  logo_alt: "VitePress"
+  logo_width: 24
+  logo_height: 24
+  site_title: Jekyll VitePress
+  font_family_base: "'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'"
+  font_family_mono: "ui-monospace, 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace"
+  google_fonts_url: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+  rouge_theme:
+    light: github
+    dark: github.dark
+  nav:
+    - text: Guide
+      link: /what-is-jekyll-vitepress-theme/
+      collections:
+        - getting_started
+        - core_features
+        - advanced
+    - text: Reference
+      link: /configuration-reference/
+      collections:
+        - reference
+  version:
+    current: next
+    items:
+      - text: next (unreleased)
+        link: /next/
+      - text: Changelog
+        link: https://github.com/crmne/jekyll-vitepress-theme/releases
+        external: true
+  social_links:
+    - icon: github
+      link: https://github.com/crmne/jekyll-vitepress-theme
+      aria_label: GitHub
+    - icon: x
+      link: https://x.com/paolino
+      aria_label: X
+    - icon: blog
+      link: https://paolino.me
+      aria_label: Blog
+  sidebar_collections:
+    - id: getting_started
+      text: Introduction
+    - id: core_features
+      text: Core Features
+    - id: advanced
+      text: Advanced
+    - id: reference
+      text: Reference
+  footer:
+    message: Brought to you by <a href="https://paolino.me">Carmine Paolino</a>, maker of
+    copyright: >-
+      <span class="footer-brand-links"><a href="https://chatwithwork.com" class="footer-chatwithwork-link"><img class="footer-chatwithwork-logo" src="https://chatwithwork.com/logotype.svg" alt="Chat with Work"></a><a href="https://rubyllm.com" class="footer-rubyllm-link"><img class="footer-rubyllm-logo theme-image light" src="https://rubyllm.com/assets/images/logotype.svg" alt="RubyLLM"><img class="footer-rubyllm-logo theme-image dark" src="https://rubyllm.com/assets/images/logotype_dark.svg" alt="RubyLLM"></a></span>
+  doc_footer:
+    prev: Previous page
+    next: Next page
+  last_updated:
+    text: Last updated
+    format: "%-d %b %Y, %H:%M"
+  outline_title: On this page
+  scroll_offset: 134
+  sidebar_menu_label: Menu
+  return_to_top_label: Return to top
+  skip_to_content_label: Skip to content
+  dark_mode_switch_label: Appearance
+  dark_mode_switch_title: Switch to dark theme
+  light_mode_switch_title: Switch to light theme
+  edit_link:
+    pattern: "https://github.com/crmne/jekyll-vitepress-theme/edit/main/:path"
+    text: Edit this page on GitHub
+
+appearance: true
+
+plugins:
+  - jekyll-vitepress-theme
+  - jekyll-redirect-from
+
+exclude:
+  - _site
+  - .jekyll-cache
+  - vendor
+  - node_modules
+  - lib
+  - jekyll-vitepress-theme.gemspec
+  - Gemfile
+  - Gemfile.lock

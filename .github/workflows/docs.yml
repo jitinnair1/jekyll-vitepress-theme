@@ -1,0 +1,89 @@
+name: Deploy Docs (next)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/docs.yml'
+      - '_**/**'
+      - '_config.yml'
+      - 'assets/**'
+      - 'lib/**'
+      - 'scripts/**'
+      - '*.md'
+      - 'search.json'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gh-pages-publish
+  cancel-in-progress: false
+
+jobs:
+  deploy-next:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+
+      - name: Derive Pages metadata
+        id: meta
+        shell: bash
+        run: |
+          set -euo pipefail
+          OWNER="${GITHUB_REPOSITORY_OWNER}"
+          REPO="${GITHUB_REPOSITORY#*/}"
+          if [[ "${REPO}" == "${OWNER}.github.io" ]]; then
+            BASE_PATH=""
+          else
+            BASE_PATH="/${REPO}"
+          fi
+          SHORT_SHA="${GITHUB_SHA::7}"
+          echo "base_path=${BASE_PATH}" >> "$GITHUB_OUTPUT"
+          echo "short_sha=${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Load existing versions manifest from gh-pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .tmp
+          if git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
+            git fetch --no-tags origin gh-pages
+            git show origin/gh-pages:versions.yml > .tmp/versions-in.yml || true
+          fi
+
+      - name: Generate versions.yml
+        run: |
+          ruby scripts/version_manifest.rb \
+            --mode next \
+            --base-path "${{ steps.meta.outputs.base_path }}" \
+            --manifest-in .tmp/versions-in.yml \
+            --manifest-out _data/versions.yml \
+            --repository "${{ github.repository }}"
+
+      - name: Build next docs
+        run: |
+          bundle exec jekyll build \
+            --baseurl "${{ steps.meta.outputs.base_path }}/next" \
+            --destination _site_next
+        env:
+          JEKYLL_ENV: production
+
+      - name: Publish next docs to gh-pages
+        env:
+          SITE_NEXT_DIR: _site_next
+          VERSIONS_FILE: _data/versions.yml
+        run: |
+          export COMMIT_MESSAGE="docs: publish next (${GITHUB_SHA::7})"
+          bash scripts/publish_gh_pages.sh next
