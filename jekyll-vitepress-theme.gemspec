@@ -8,10 +8,17 @@ Gem::Specification.new do |spec|
 
   spec.summary       = 'A VitePress-like docs theme for Jekyll.'
   spec.description   = 'Jekyll VitePress Theme brings the VitePress default theme look and behavior to Jekyll sites.'
-  spec.homepage      = 'https://github.com/crmne/jekyll-vitepress-theme'
+  spec.homepage      = 'https://jekyll-vitepress.dev'
   spec.license       = 'MIT'
   spec.required_ruby_version = '>= 3.1'
   spec.metadata['rubygems_mfa_required'] = 'true'
+
+  spec.metadata['homepage_uri'] = spec.homepage
+  spec.metadata['source_code_uri'] = 'https://github.com/crmne/jekyll-vitepress-theme'
+  spec.metadata['changelog_uri'] = "#{spec.metadata['source_code_uri']}/commits/master"
+  spec.metadata['documentation_uri'] = spec.homepage
+  spec.metadata['bug_tracker_uri'] = "#{spec.metadata['source_code_uri']}/issues"
+  spec.metadata['funding_uri'] = 'https://github.com/sponsors/crmne'
 
   spec.files = Dir[
     'assets/**/*',
