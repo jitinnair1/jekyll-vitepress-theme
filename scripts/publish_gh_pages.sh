@@ -35,7 +35,8 @@ if git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
 else
   git worktree add --detach "${WORKTREE_DIR}"
   git -C "${WORKTREE_DIR}" checkout --orphan gh-pages
-  rm -rf "${WORKTREE_DIR:?}/"* "${WORKTREE_DIR}"/.[!.]* "${WORKTREE_DIR}"/..?* 2>/dev/null || true
+  # Keep the worktree metadata and remove all checked out files.
+  find "${WORKTREE_DIR}" -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
 fi
 
 mkdir -p "${WORKTREE_DIR}"
