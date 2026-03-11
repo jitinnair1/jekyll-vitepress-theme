@@ -94,7 +94,7 @@ if [[ "${MODE}" == "single" ]]; then
     exit 1
   fi
 
-  rsync -a --delete "${SITE_ROOT_DIR}/" "${WORKTREE_DIR}/"
+  rsync -a --delete --exclude='.git' "${SITE_ROOT_DIR}/" "${WORKTREE_DIR}/"
 
   if [[ -n "${EXISTING_CNAME}" && ! -f "${WORKTREE_DIR}/CNAME" ]]; then
     printf '%s\n' "${EXISTING_CNAME}" > "${WORKTREE_DIR}/CNAME"
