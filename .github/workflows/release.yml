@@ -5,15 +5,14 @@ on:
 
 permissions:
   contents: write
-  pages: write
 
 concurrency:
-  group: gh-pages-publish
+  group: gem-release
   cancel-in-progress: false
 
 jobs:
   publish:
-    name: Build + Publish
+    name: Build + Publish Gem
     runs-on: ubuntu-latest
 
     steps:
@@ -63,62 +62,6 @@ jobs:
             echo "version_changed=true" >> "$GITHUB_OUTPUT"
             echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
           fi
-
-      - name: Setup Pages metadata
-        if: steps.check_version.outputs.version_changed == 'true'
-        id: pages
-        uses: actions/configure-pages@v5
-
-      - name: Load existing versions manifest from gh-pages
-        if: steps.check_version.outputs.version_changed == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p .tmp
-          if git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
-            git fetch --no-tags origin gh-pages
-            git show origin/gh-pages:versions.yml > .tmp/versions-in.yml || true
-          fi
-
-      - name: Generate versions.yml
-        if: steps.check_version.outputs.version_changed == 'true'
-        run: |
-          ruby scripts/version_manifest.rb \
-            --mode release \
-            --version "${{ steps.check_version.outputs.version }}" \
-            --base-path "${{ steps.pages.outputs.base_path }}" \
-            --manifest-in .tmp/versions-in.yml \
-            --manifest-out _data/versions.yml \
-            --repository "${{ github.repository }}"
-
-      - name: Build versioned docs
-        if: steps.check_version.outputs.version_changed == 'true'
-        run: |
-          bundle exec jekyll build \
-            --baseurl "${{ steps.pages.outputs.base_path }}/v/${{ steps.check_version.outputs.version }}" \
-            --destination _site_release
-        env:
-          JEKYLL_ENV: production
-
-      - name: Build latest docs
-        if: steps.check_version.outputs.version_changed == 'true'
-        run: |
-          bundle exec jekyll build \
-            --baseurl "${{ steps.pages.outputs.base_path }}/latest" \
-            --destination _site_latest
-        env:
-          JEKYLL_ENV: production
-
-      - name: Publish version + latest docs to gh-pages
-        if: steps.check_version.outputs.version_changed == 'true'
-        env:
-          RELEASE_VERSION: ${{ steps.check_version.outputs.version }}
-          SITE_RELEASE_DIR: _site_release
-          SITE_LATEST_DIR: _site_latest
-          VERSIONS_FILE: _data/versions.yml
-        run: |
-          export COMMIT_MESSAGE="docs: publish v${RELEASE_VERSION} + latest"
-          bash scripts/publish_gh_pages.sh release
 
       - name: Build gem package
         if: steps.check_version.outputs.version_changed == 'true'

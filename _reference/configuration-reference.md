@@ -80,6 +80,7 @@ vp_theme:
 {: data-title="_config.yml"}
 
 If `/_data/versions.yml` exists, it becomes the source of truth for the version selector and overrides `vp_theme.version`.
+This is intended for optional multi-version docs setups.
 
 Built-in icon slugs are:
 `github`, `gitlab`, `bitbucket`, `discord`, `slack`, `x`, `twitter`,

@@ -67,11 +67,11 @@ bundle exec overcommit --sign pre-push
 bundle exec overcommit --run
 ```
 
-## Docs versioning (this repo)
+## Docs deployment (this repo)
 
-- `main` deploys unreleased docs to `/next/`
-- `main` runs a release gate; when the gem version is unpublished, release docs deploy to `/v/x.y.z/` and refresh `/latest/`
-- `gh-pages/versions.yml` is the single source of truth for the version selector
+- `main` deploys a single docs site at `/`
+- Compatibility redirects keep `/latest/` and `/v/0.9.0/` pointing at `/`
+- Optional multi-version deployment is documented in [_advanced/deployment.md](_advanced/deployment.md)
 
 ## Theme configuration
 

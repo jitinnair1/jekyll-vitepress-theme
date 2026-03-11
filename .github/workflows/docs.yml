@@ -1,4 +1,4 @@
-name: Deploy Docs (next)
+name: Deploy Docs
 
 on:
   push:
@@ -24,7 +24,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy-next:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -43,37 +43,19 @@ jobs:
         id: pages
         uses: actions/configure-pages@v5
 
-      - name: Load existing versions manifest from gh-pages
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p .tmp
-          if git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
-            git fetch --no-tags origin gh-pages
-            git show origin/gh-pages:versions.yml > .tmp/versions-in.yml || true
-          fi
-
-      - name: Generate versions.yml
-        run: |
-          ruby scripts/version_manifest.rb \
-            --mode next \
-            --base-path "${{ steps.pages.outputs.base_path }}" \
-            --manifest-in .tmp/versions-in.yml \
-            --manifest-out _data/versions.yml \
-            --repository "${{ github.repository }}"
-
-      - name: Build next docs
+      - name: Build docs
         run: |
           bundle exec jekyll build \
-            --baseurl "${{ steps.pages.outputs.base_path }}/next" \
-            --destination _site_next
+            --baseurl "${{ steps.pages.outputs.base_path }}" \
+            --destination _site
         env:
           JEKYLL_ENV: production
 
-      - name: Publish next docs to gh-pages
+      - name: Publish docs to gh-pages
         env:
-          SITE_NEXT_DIR: _site_next
-          VERSIONS_FILE: _data/versions.yml
+          SITE_ROOT_DIR: _site
+          DOCS_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          LEGACY_VERSION_REDIRECTS: "0.9.0"
         run: |
-          export COMMIT_MESSAGE="docs: publish next (${GITHUB_SHA::7})"
-          bash scripts/publish_gh_pages.sh next
+          export COMMIT_MESSAGE="docs: publish site (${GITHUB_SHA::7})"
+          bash scripts/publish_gh_pages.sh single

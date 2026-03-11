@@ -1,16 +1,32 @@
 ---
 title: Deployment
 nav_order: 3
-description: Build and deploy versioned docs with GitHub Pages on gh-pages.
+description: Deploy a single docs site by default, with optional multi-version mode.
 ---
 
-This theme repository uses a branch-based versioned deployment flow:
+## Default (recommended): single docs site
 
-1. Push to `main` publishes unreleased docs to `/next/`.
-2. `main` also runs a release gate; if `lib/jekyll/vitepress_theme/version.rb` is not published on RubyGems, it runs the release workflow.
-3. A release publish writes immutable docs to `/v/x.y.z/` and refreshes `/latest/`.
-4. A shared `versions.yml` manifest drives the version selector.
+This repository deploys one canonical docs site at `/` from `main`.
 
-This keeps old versions intact while always exposing both preview (`next`) and stable (`latest`) docs.
+The docs workflow:
+
+1. Builds Jekyll once at the repository base path.
+2. Publishes the build to `gh-pages` root.
+3. Maintains compatibility redirects from `/latest/` and `/v/0.9.0/` back to `/`.
+
+This keeps CI and maintenance simple while preserving old links.
+
+## Optional: multi-version docs
+
+If your project needs versioned docs (`/next/`, `/latest/`, `/v/x.y.z/`), this theme includes an advanced pattern:
+
+- `scripts/version_manifest.rb` to generate `/_data/versions.yml`
+- `scripts/publish_gh_pages.sh` modes:
+  - `next`
+  - `release`
+
+When `/_data/versions.yml` is present, it overrides `vp_theme.version` in nav.
+
+Use this mode only when you need immutable version snapshots. It adds operational complexity and more edge cases (caching, legacy paths, rebuilds).
 
 In repository settings, configure GitHub Pages to serve from branch `gh-pages` (root).

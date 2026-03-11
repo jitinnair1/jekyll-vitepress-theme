@@ -105,5 +105,4 @@ jobs:
     uses: ./.github/workflows/release.yml
     permissions:
       contents: write
-      pages: write
     secrets: inherit

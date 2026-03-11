@@ -78,10 +78,8 @@ vp_theme:
       collections:
         - reference
   version:
-    current: next
+    current: v0.9.0
     items:
-      - text: next (unreleased)
-        link: /next/
       - text: Changelog
         link: https://github.com/crmne/jekyll-vitepress-theme/releases
         external: true
@@ -137,7 +135,9 @@ exclude:
   - .jekyll-cache
   - vendor
   - node_modules
+  - scripts
   - lib
+  - "*.gem"
   - jekyll-vitepress-theme.gemspec
   - Gemfile
   - Gemfile.lock

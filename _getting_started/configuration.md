@@ -53,4 +53,5 @@ Social icons support a curated built-in set (GitHub, X/Twitter, Discord, YouTube
 Need custom `<head>` tags (extra fonts, analytics, verification meta)?
 Create `_includes/vp_slots/head.html` in your site and add your tags there.
 
-For multi-version docs in this theme repo, `/_data/versions.yml` drives the version selector (`next`, `latest`, and `/v/x.y.z/` entries).
+If `/_data/versions.yml` exists, it overrides `vp_theme.version` and drives the version selector.
+Use this only for advanced multi-version docs setups.
