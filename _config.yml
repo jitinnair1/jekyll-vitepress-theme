@@ -121,7 +121,7 @@ vp_theme:
   dark_mode_switch_title: Switch to dark theme
   light_mode_switch_title: Switch to light theme
   edit_link:
-    pattern: "https://github.com/crmne/jekyll-vitepress-theme/edit/main/:path"
+    pattern: "https://github.com/crmne/jekyll-vitepress-theme/edit/master/:path"
     text: Edit this page on GitHub
 
 appearance: true
