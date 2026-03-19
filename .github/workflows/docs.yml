@@ -13,6 +13,8 @@ on:
       - 'scripts/**'
       - '*.md'
       - 'search.json'
+      - 'Gemfile'
+      - 'Gemfile.lock'
   workflow_dispatch:
 
 permissions:
