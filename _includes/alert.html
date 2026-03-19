@@ -1,0 +1,22 @@
+{% assign alert_type = include.type | default: "tip" %}
+{% assign default_titles = "info:INFO,note:NOTE,tip:TIP,important:IMPORTANT,warning:WARNING,danger:DANGER,caution:CAUTION,details:Details" | split: "," %}
+{% assign alert_title = include.title %}
+{% unless alert_title %}
+  {% for pair in default_titles %}
+    {% assign kv = pair | split: ":" %}
+    {% if kv[0] == alert_type %}
+      {% assign alert_title = kv[1] %}
+    {% endif %}
+  {% endfor %}
+{% endunless %}
+{% if alert_type == "details" %}
+<details class="details custom-block">
+  <summary>{{ alert_title }}</summary>
+  <p>{{ include.content | markdownify | remove: '<p>' | remove: '</p>' }}</p>
+</details>
+{% else %}
+<div class="{{ alert_type }} custom-block">
+  <p class="custom-block-title">{{ alert_title }}</p>
+  <p>{{ include.content | markdownify | remove: '<p>' | remove: '</p>' }}</p>
+</div>
+{% endif %}

@@ -101,7 +101,7 @@ jekyll_vitepress:
 ### Footer and Doc Footer
 
 - `footer.enabled`
-- `footer.show_on_docs` (defaults to `false` behavior when omitted)
+- `footer.show_on_docs` (defaults to `false` — footer only shows on home page unless set to `true`)
 - `footer.message`
 - `footer.copyright`
 - `doc_footer.enabled`

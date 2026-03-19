@@ -4,34 +4,39 @@ nav_order: 3
 description: Deploy a single docs site by default, with optional multi-version mode.
 ---
 
-## Default (recommended): single docs site
+## Single docs site (recommended)
 
-This repository deploys one canonical docs site at `/` from `main`.
+The simplest and recommended approach is deploying one canonical docs site at `/`. This is the standard GitHub Pages workflow:
 
-The docs workflow:
+1. Build Jekyll at the repository root.
+2. Publish the output to the `gh-pages` branch (or configure GitHub Pages to build from your default branch).
 
-1. Builds Jekyll once at the repository base path.
-2. Publishes the build to `gh-pages` root.
+With GitHub Actions, a minimal workflow looks like:
 
-This keeps CI and maintenance simple.
+```yaml
+- uses: actions/jekyll-build-pages@v1
+- uses: actions/deploy-pages@v4
+```
 
-## Optional: multi-version docs
+This keeps CI simple and avoids the complexity of managing multiple doc versions.
 
-If your project needs versioned docs (`/next/`, `/latest/`, `/v/x.y.z/`), this theme includes an advanced pattern:
+## Multi-version docs (optional)
 
-- `scripts/version_manifest.rb` to generate `/_data/versions.yml`
-- `scripts/publish_gh_pages.sh` modes:
-  - `next`
-  - `release`
+If your project needs versioned documentation — say, `/next/` for the development branch, `/latest/` for the current release, and `/v/1.0.0/` for specific versions — the theme includes scripts to support this pattern:
 
-Typical flow:
+- `scripts/version_manifest.rb` generates `_data/versions.yml` from your release history
+- `scripts/publish_gh_pages.sh` handles publishing in two modes:
+  - `next` — publishes to the `/next/` path
+  - `release` — publishes to both `/v/x.y.z/` and `/latest/`
 
-1. On every push to `main`, build docs with baseurl `/next` and publish with `publish_gh_pages.sh next`.
-2. On release, build docs for `/v/x.y.z` and `/latest`, then publish with `publish_gh_pages.sh release`.
-3. Keep `versions.yml` in `gh-pages` as the selector source of truth.
+A typical CI flow:
 
-When `/_data/versions.yml` is present, it is used as the version selector source.
+1. **On every push to the default branch**, build docs with `baseurl: /next` and publish with `publish_gh_pages.sh next`.
+2. **On release**, build for `/v/x.y.z` and `/latest`, then publish with `publish_gh_pages.sh release`.
+3. `_data/versions.yml` on the `gh-pages` branch becomes the source of truth for the version selector dropdown.
 
-Use this mode only when you need immutable version snapshots. It adds operational complexity and more edge cases (caching, legacy paths, rebuilds).
+When `_data/versions.yml` is present and contains version items, the theme renders a version selector in the navbar automatically.
 
-In repository settings, configure GitHub Pages to serve from branch `gh-pages` (root).
+{% include alert.html type="warning" content="Multi-version mode adds operational complexity — caching behavior, legacy paths, and rebuild coordination all need attention. Only use it when you genuinely need immutable version snapshots. For most projects, a single docs site with a changelog link is sufficient." %}
+
+In your repository's GitHub Pages settings, configure the source to serve from branch `gh-pages` (root).
