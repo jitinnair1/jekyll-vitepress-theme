@@ -54,7 +54,7 @@
                 <div class="content">
                   <div class="content-container">
                     <main class="main">
-                      <div class="vp-doc{% if page.url %} {{ page.url | replace: '/', '_' | replace: '.', '_' }}{% endif %}">
+                      <div class="vp-doc external-link-icon-enabled{% if page.url %} {{ page.url | replace: '/', '_' | replace: '.', '_' }}{% endif %}">
                         {% assign show_auto_page_title = false %}
                         {% if page.title and page_theme.auto_title != false %}
                           {% unless content contains '<h1' %}
@@ -80,7 +80,7 @@
                 <div class="content">
                   <div class="content-container">
                     <main class="main">
-                      <div class="vp-doc{% if page.url %} {{ page.url | replace: '/', '_' | replace: '.', '_' }}{% endif %}">
+                      <div class="vp-doc external-link-icon-enabled{% if page.url %} {{ page.url | replace: '/', '_' | replace: '.', '_' }}{% endif %}">
                         {% assign show_auto_page_title = false %}
                         {% if page.title and page_theme.auto_title != false %}
                           {% unless content contains '<h1' %}
