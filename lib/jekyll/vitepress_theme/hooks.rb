@@ -104,6 +104,56 @@ module Jekyll
         value.to_s.strip.casecmp(AUTO_VALUE).zero?
       end
     end
+
+    module CopyPage
+      module_function
+
+      def enabled?(item)
+        theme_config = item.site.config['jekyll_vitepress']
+        copy_page_disabled = theme_config.is_a?(Hash) &&
+                             theme_config['copy_page'].is_a?(Hash) &&
+                             theme_config['copy_page']['enabled'] == false
+
+        unless copy_page_disabled
+          page_theme = item.data['jekyll_vitepress']
+          copy_page_disabled = page_theme == false || (page_theme.is_a?(Hash) && page_theme['copy_page'] == false)
+        end
+
+        !copy_page_disabled
+      end
+
+      def resolved_markdown(item, payload)
+        raw = item.content.to_s
+        return raw unless item.respond_to?(:render_with_liquid?) && item.render_with_liquid?
+
+        item.renderer.render_liquid(raw, payload, liquid_render_info(item, payload), item.path)
+      rescue StandardError => e
+        relative_path = item.respond_to?(:relative_path) ? item.relative_path : item.path
+        Jekyll.logger.warn('jekyll-vitepress-theme', "Copy page markdown capture failed for #{relative_path}: #{e.message}")
+        raw
+      end
+
+      def liquid_render_info(item, payload)
+        liquid_options = item.site.config['liquid'] || {}
+
+        {
+          registers: { site: item.site, page: payload['page'] },
+          strict_filters: liquid_options['strict_filters'],
+          strict_variables: liquid_options['strict_variables']
+        }
+      end
+
+      def leading_h1?(markdown)
+        return false if markdown.nil?
+
+        stripped = markdown.lstrip
+        return false if stripped.empty?
+
+        stripped.match?(/\A#\s+\S/) ||
+          stripped.match?(/\A<h1(?:\s|>)/i) ||
+          stripped.match?(/\A[^\n]+\n=+\s*(?:\n|$)/)
+      end
+    end
   end
 end
 
@@ -112,18 +162,10 @@ Jekyll::Hooks.register :site, :post_read do |site|
   Jekyll::VitePressTheme::RougeStyles.apply(site)
 end
 
-Jekyll::Hooks.register :documents, :pre_render do |document|
-  theme_config = document.site.config['jekyll_vitepress']
-  copy_page_disabled = theme_config.is_a?(Hash) &&
-                       theme_config['copy_page'].is_a?(Hash) &&
-                       theme_config['copy_page']['enabled'] == false
-
-  unless copy_page_disabled
-    page_theme = document.data['jekyll_vitepress']
-    copy_page_disabled = page_theme == false || (page_theme.is_a?(Hash) && page_theme['copy_page'] == false)
+Jekyll::Hooks.register :documents, :pre_render do |document, payload|
+  if Jekyll::VitePressTheme::CopyPage.enabled?(document)
+    document.data['_raw_markdown'] = Jekyll::VitePressTheme::CopyPage.resolved_markdown(document, payload)
   end
-
-  document.data['_raw_markdown'] = document.content unless copy_page_disabled
 
   next if document.data.key?('last_updated_at')
 
@@ -131,18 +173,10 @@ Jekyll::Hooks.register :documents, :pre_render do |document|
   document.data['last_updated_at'] = updated_at if updated_at
 end
 
-Jekyll::Hooks.register :pages, :pre_render do |page|
-  theme_config = page.site.config['jekyll_vitepress']
-  copy_page_disabled = theme_config.is_a?(Hash) &&
-                       theme_config['copy_page'].is_a?(Hash) &&
-                       theme_config['copy_page']['enabled'] == false
-
-  unless copy_page_disabled
-    page_theme = page.data['jekyll_vitepress']
-    copy_page_disabled = page_theme == false || (page_theme.is_a?(Hash) && page_theme['copy_page'] == false)
+Jekyll::Hooks.register :pages, :pre_render do |page, payload|
+  if Jekyll::VitePressTheme::CopyPage.enabled?(page)
+    page.data['_raw_markdown'] = Jekyll::VitePressTheme::CopyPage.resolved_markdown(page, payload)
   end
-
-  page.data['_raw_markdown'] = page.content unless copy_page_disabled
 
   next if page.data.key?('last_updated_at')
 
@@ -171,7 +205,7 @@ Jekyll::Hooks.register :site, :post_write do |site|
     md_path = '/index.md' if item.url == '/'
 
     title = item.data['title']
-    body = if title && !title.empty? && !raw.strip.start_with?('# ')
+    body = if title && !title.empty? && !Jekyll::VitePressTheme::CopyPage.leading_h1?(raw)
              "# #{title}\n\n#{raw}"
            else
              raw
