@@ -14,7 +14,9 @@ Open search with any of these shortcuts:
 - `Ctrl+K` (Windows/Linux)
 - `Cmd+K` (macOS)
 
-The search index is generated from a `search.json` file at build time. It includes the home page and all documents from your sidebar collections. Results show matching page titles and content excerpts, and clicking a result navigates directly to that page.
+The plugin generates `/search.json` automatically at build time. It includes the home page and all documents from your sidebar collections. Results show matching page titles and content excerpts, and clicking a result navigates directly to that page.
+
+If you need custom indexing behavior, add your own `search.json` page to the site and it will override the generated default.
 
 {% include alert.html type="tip" content="If search doesn't seem to find certain pages, make sure those pages belong to a collection listed in your `_data/sidebar.yml`. Only sidebar collections are indexed." %}
 

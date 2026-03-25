@@ -3,6 +3,75 @@ require 'rouge'
 
 module Jekyll
   module VitePressTheme
+    module SearchIndex
+      module_function
+
+      TEMPLATE = <<~LIQUID.freeze
+        [
+        {% assign first = true %}
+        {% assign home_page = site.pages | where: 'url', '/' | first %}
+        {% if home_page %}
+          {% assign home_excerpt = home_page.content | markdownify | strip_html | strip_newlines | replace: '  ', ' ' | strip | truncate: 2400, '' %}
+          {
+            "title": {{ home_page.title | default: site.title | strip_html | strip | jsonify }},
+            "url": {{ home_page.url | relative_url | jsonify }},
+            "content": {{ home_excerpt | jsonify }}
+          }
+          {% assign first = false %}
+        {% endif %}
+        {% assign sidebar_groups = site.data.sidebar %}
+        {% for group in sidebar_groups %}
+          {% assign docs = site[group.collection] | sort: 'nav_order' %}
+          {% for doc in docs %}
+            {% if doc.title and doc.url %}
+              {% unless first %},{% endunless %}
+              {% assign excerpt = doc.content | markdownify | strip_html | strip_newlines | replace: '  ', ' ' | strip | truncate: 2400, '' %}
+              {
+                "title": {{ doc.title | strip_html | strip | jsonify }},
+                "url": {{ doc.url | relative_url | jsonify }},
+                "content": {{ excerpt | jsonify }}
+              }
+              {% assign first = false %}
+            {% endif %}
+          {% endfor %}
+        {% endfor %}
+        ]
+      LIQUID
+
+      class GeneratedPage < Jekyll::PageWithoutAFile
+        def initialize(site)
+          super(site, site.source, '', 'search.json')
+
+          self.content = TEMPLATE
+          data['layout'] = nil
+          data['permalink'] = '/search.json'
+        end
+      end
+
+      def apply(site)
+        return if custom_page?(site)
+
+        site.pages << GeneratedPage.new(site)
+      end
+
+      def custom_page?(site)
+        site.pages.any? { |page| search_index_path?(page.path) || search_index_url?(page.url) } ||
+          site.static_files.any? { |file| search_index_path?(file.path) || search_index_url?(file.relative_path) }
+      end
+
+      def search_index_path?(value)
+        return false unless value
+
+        Pathname.new(value.to_s).basename.to_s == 'search.json'
+      rescue ArgumentError
+        false
+      end
+
+      def search_index_url?(value)
+        value.to_s.strip == '/search.json'
+      end
+    end
+
     module LastUpdated
       module_function
 
@@ -160,6 +229,7 @@ end
 Jekyll::Hooks.register :site, :post_read do |site|
   Jekyll::VitePressTheme::VersionLabel.apply(site)
   Jekyll::VitePressTheme::RougeStyles.apply(site)
+  Jekyll::VitePressTheme::SearchIndex.apply(site)
 end
 
 Jekyll::Hooks.register :documents, :pre_render do |document, payload|

@@ -27,5 +27,6 @@ grep -q "VPHero" "${SITE_DIR}/index.html" || { echo "Smoke test failed: home her
 grep -q "VPVersionSelector" "${SITE_DIR}/getting-started/index.html" || { echo "Smoke test failed: version selector missing"; exit 1; }
 grep -q "id=\"vp-search\"" "${SITE_DIR}/getting-started/index.html" || { echo "Smoke test failed: search container missing"; exit 1; }
 grep -q "VPDocFooter" "${SITE_DIR}/getting-started/index.html" || { echo "Smoke test failed: doc footer missing"; exit 1; }
+grep -q '"url": "/getting-started/"' "${SITE_DIR}/search.json" || { echo "Smoke test failed: generated search index missing docs content"; exit 1; }
 
 echo "Smoke test passed for ${SITE_DIR}"
