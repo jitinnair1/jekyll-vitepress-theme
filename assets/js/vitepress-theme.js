@@ -77,8 +77,11 @@
   applyMode(mode);
 
   function cycleMode() {
-    var isDark = document.documentElement.classList.contains('dark');
-    var changeModeTo = isDark ? 'light' : 'dark';
+    var isDark = root.classList.contains('dark');
+    var nextMode = isDark ? 'light' : 'dark';
+    var systemMode = mediaQuery.matches ? 'dark' : 'light';
+
+    mode = nextMode === systemMode ? 'auto' : nextMode;
     writeMode(mode);
     applyModeWithoutTransitions(mode);
   }
